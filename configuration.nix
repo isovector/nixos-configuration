@@ -90,16 +90,35 @@
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
+    # development environment
+    zsh
     neovim
-    wget
-    jujutsu
-    xmonad-with-packages
+    neovide
     git
+    jujutsu
+    thefuck
+    silver-searcher
+    jump
+    kitty
+
+    # desktop
+    xmonad-with-packages
     brave
     acpilight # xbacklight
     redshift
-    zsh
+    dmenu # just to bootstrap xmonad
+    rofi
+    feh
+    eww
 
+    # apps
+    spotify
+    pavucontrol
+    beeper
+    betterbird
+
+    # utils
+    wget
     coreutils # chown; chmod
   ];
 
@@ -130,4 +149,7 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.05"; # Did you read the comment?
 
+  # bluetooth
+  hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
 }
