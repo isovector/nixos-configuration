@@ -73,7 +73,7 @@
   users.users.sandy = {
     isNormalUser = true;
     description = "Sandy";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "video" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
     #  thunderbird
@@ -100,6 +100,7 @@
     silver-searcher
     jump
     kitty
+    stack
 
     # desktop
     xmonad-with-packages
@@ -116,10 +117,21 @@
     pavucontrol
     beeper
     betterbird
+    gimp-with-plugins
 
     # utils
     wget
     coreutils # chown; chmod
+    thermald # powermgmt
+    xorg.xmodmap
+    xorg.xsetroot
+    xorg.xev
+    xclip
+    acpi
+    lm_sensors
+    mlocate
+    xarchiver
+    xfce.tumbler # thumbnails
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -149,7 +161,25 @@
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
   system.stateVersion = "24.05"; # Did you read the comment?
 
+  services.miniflux.enable = true;
+  services.miniflux.adminCredentialsFile = "/home/sandy/.tino/miniflux.conf";
+
   # bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
+
+  powerManagement.enable = true;
+  # powerManagement.powertop.enable = true;
+  services.thermald.enable = true;
+  services.tlp.enable = true;
+
+  services.udev.extraRules = ''
+# backlight
+RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/backlight/acpi_video0/brightness"
+RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/backlight/acpi_video0/brightness"
+  '';
+
+
+  # things to run
+  services.xserver.displayManager.sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap /home/sandy/.xmodmaprc";
 }
