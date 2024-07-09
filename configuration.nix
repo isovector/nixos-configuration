@@ -73,7 +73,7 @@
   users.users.sandy = {
     isNormalUser = true;
     description = "Sandy";
-    extraGroups = [ "networkmanager" "wheel" "video" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "dialout" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
     #  thunderbird
@@ -101,6 +101,8 @@
     jump
     kitty
     stack
+    gnumake
+    tmux
 
     # desktop
     xmonad-with-packages
@@ -111,13 +113,16 @@
     rofi
     feh
     eww
+    playerctl
+    scrot
 
     # apps
     spotify
     pavucontrol
     beeper
-    betterbird
+    thunderbird
     gimp-with-plugins
+    evince
 
     # utils
     wget
@@ -132,6 +137,21 @@
     mlocate
     xarchiver
     xfce.tumbler # thumbnails
+    pciutils # lspci
+    usbutils # lsusb
+    inxi
+    tzdata
+    intel-gpu-tools
+    libva-utils
+    htop
+    vdpauinfo
+    yt-dlp
+    unrar
+    graphviz
+
+    # temporary
+    plasma5Packages.plasma-thunderbolt # thunderbolt gui
+    plover.dev # steno
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -177,9 +197,20 @@
 # backlight
 RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/backlight/acpi_video0/brightness"
 RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/backlight/acpi_video0/brightness"
+
+# oryx
+# https://github.com/zsa/wally/wiki/Linux-install#2-create-a-udev-rule-file
+KERNEL=="hidraw*", ATTRS{idVendor}=="16c0", MODE="0664", GROUP="plugdev"
+KERNEL=="hidraw*", ATTRS{idVendor}=="3297", MODE="0664", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTR{idVendor}=="3297", GROUP="plugdev"
+SUBSYSTEM=="usb", ATTR{idVendor}=="3297", ATTR{idProduct}=="1969", GROUP="plugdev"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666", SYMLINK+="stm32_dfu"
   '';
 
 
   # things to run
   services.xserver.displayManager.sessionCommands = "${pkgs.xorg.xmodmap}/bin/xmodmap /home/sandy/.xmodmaprc";
+
+  # thunderbolt
+  services.hardware.bolt.enable = true;
 }

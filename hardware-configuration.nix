@@ -32,7 +32,7 @@
       fsType = "ext4";
     };
 
-  swapDevices = [ 
+  swapDevices = [
     { device = "/dev/nvme0n1p1";
     }
   ];
@@ -47,4 +47,17 @@
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.intel.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
+
+  # hardware accel
+  hardware = {
+    opengl.enable = true;
+    opengl.driSupport = true;
+    opengl.driSupport32Bit = true;
+
+    opengl.extraPackages = with pkgs; [
+        intel-media-driver
+        vaapiVdpau
+        libvdpau-va-gl
+      ];
+  };
 }
