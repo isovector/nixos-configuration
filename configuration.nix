@@ -10,16 +10,21 @@
       ./hardware-configuration.nix
     ];
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      unstable = import <nixos-unstable> {
+        config = { allowUnfree = true; };
+        system = prev.system;
+      };
+    })
+  ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "nixos"; # Define your hostname.
+  networking.hostName = "marvelmachine"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -39,6 +44,14 @@
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
+  };
+
+  services.libinput.enable = true;
+  services.libinput.touchpad = {
+    clickMethod = "clickfinger";
+    tapping = true;
+    disableWhileTyping = true;
+    middleEmulation = true;
   };
 
   # Configure keymap in X11
@@ -66,9 +79,6 @@
     #media-session.enable = true;
   };
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.sandy = {
     isNormalUser = true;
@@ -83,6 +93,12 @@
   # Install firefox.
   programs.firefox.enable = true;
   programs.zsh.enable = true;
+  programs.steam.enable = true;
+
+  programs.neovim = {
+    enable = true;
+    vimAlias = true;
+  };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
@@ -92,10 +108,9 @@
   environment.systemPackages = with pkgs; [
     # development environment
     zsh
-    neovim
     neovide
     git
-    jujutsu
+    unstable.jujutsu
     thefuck
     silver-searcher
     jump
@@ -103,18 +118,20 @@
     stack
     gnumake
     tmux
+    jq
 
     # desktop
     xmonad-with-packages
     brave
     acpilight # xbacklight
     redshift
-    dmenu # just to bootstrap xmonad
     rofi
     feh
     eww
     playerctl
     scrot
+    urlencode # for hackage search
+    lsof
 
     # apps
     spotify
@@ -123,6 +140,10 @@
     thunderbird
     gimp-with-plugins
     evince
+    calibre
+    unstable.yed
+    inkscape
+    rmapi
 
     # utils
     wget
@@ -148,6 +169,13 @@
     yt-dlp
     unrar
     graphviz
+    agda
+    proxmark3
+    zip
+    oath-toolkit #gashell
+    openssl #gashell
+    zbar #gashell
+    curl #gashell
 
     # temporary
     plasma5Packages.plasma-thunderbolt # thunderbolt gui
@@ -193,6 +221,11 @@
   services.thermald.enable = true;
   services.tlp.enable = true;
 
+  # don’t shutdown when power button is short-pressed
+  services.logind.extraConfig = ''
+    HandlePowerKey=ignore
+  '';
+
   services.udev.extraRules = ''
 # backlight
 RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/backlight/acpi_video0/brightness"
@@ -213,4 +246,7 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="066
 
   # thunderbolt
   services.hardware.bolt.enable = true;
+
+  # enable calibre content server
+  networking.firewall.allowedTCPPorts  = [ 9090 ];
 }
