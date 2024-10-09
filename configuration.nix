@@ -29,6 +29,7 @@
   # Enable networking
   networking.networkmanager.enable = true;
 
+
   # Set your time zone.
   time.timeZone = "America/Vancouver";
 
@@ -119,6 +120,8 @@
     gnumake
     tmux
     jq
+    haskellPackages.pointfree
+    direnv
 
     # desktop
     xmonad-with-packages
@@ -144,6 +147,12 @@
     unstable.yed
     inkscape
     rmapi
+    transcribe
+    unciv
+    vlc
+    # libreoffice-qt6-still
+    deluge-gtk
+
 
     # utils
     wget
@@ -169,13 +178,18 @@
     yt-dlp
     unrar
     graphviz
-    agda
+    # (agda.withPackages (ps: [
+    #   ps.standard-library
+    # ]))
     proxmark3
     zip
     oath-toolkit #gashell
     openssl #gashell
     zbar #gashell
     curl #gashell
+    # texliveFull
+    flamegraph
+    inotify-tools
 
     # temporary
     plasma5Packages.plasma-thunderbolt # thunderbolt gui
@@ -249,4 +263,14 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="066
 
   # enable calibre content server
   networking.firewall.allowedTCPPorts  = [ 9090 ];
+
+  environment.variables."SSL_CERT_FILE" = "/etc/ssl/certs/ca-bundle.crt";
+
+  # Binary Cache for Haskell.nix
+  nix.settings.trusted-public-keys = [
+    "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+  ];
+  nix.settings.substituters = [
+    "https://cache.iog.io"
+  ];
 }
