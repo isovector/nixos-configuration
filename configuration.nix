@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./hosts.nix
     ];
 
   nixpkgs.overlays = [
@@ -84,7 +85,7 @@
   users.users.sandy = {
     isNormalUser = true;
     description = "Sandy";
-    extraGroups = [ "networkmanager" "wheel" "video" "dialout" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "dialout" "mlocate" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
     #  thunderbird
@@ -122,6 +123,8 @@
     jq
     haskellPackages.pointfree
     direnv
+    unstable.fzf
+    mermaid-cli
 
     # desktop
     xmonad-with-packages
@@ -148,11 +151,13 @@
     inkscape
     rmapi
     transcribe
-    unciv
     vlc
-    # libreoffice-qt6-still
+    libreoffice-qt6-still
     deluge-gtk
-
+    wineWowPackages.stable
+    sqlite-interactive
+    asciinema
+    desmume
 
     # utils
     wget
@@ -164,7 +169,6 @@
     xclip
     acpi
     lm_sensors
-    mlocate
     xarchiver
     xfce.tumbler # thumbnails
     pciutils # lspci
@@ -178,9 +182,9 @@
     yt-dlp
     unrar
     graphviz
-    # (agda.withPackages (ps: [
-    #   ps.standard-library
-    # ]))
+    (agda.withPackages (ps: [
+      ps.standard-library
+    ]))
     proxmark3
     zip
     oath-toolkit #gashell
@@ -190,10 +194,25 @@
     # texliveFull
     flamegraph
     inotify-tools
+    p7zip
+    bat
+    fd
+    tree
+    btop
+    lsd
+    fsatrace
+
+
+    # fpga
+    openfpgaloader
+    python312Packages.apycula # opensource gowin packing
 
     # temporary
-    plasma5Packages.plasma-thunderbolt # thunderbolt gui
-    plover.dev # steno
+
+    vaapiVdpau
+    vulkan-loader
+    vulkan-tools
+    vulkan-validation-layers
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -229,6 +248,7 @@
   # bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
+  hardware.opengl.enable = true;
 
   powerManagement.enable = true;
   # powerManagement.powertop.enable = true;
@@ -261,9 +281,11 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="066
   # thunderbolt
   services.hardware.bolt.enable = true;
 
+  # voice isolation
+  programs.noisetorch.enable = true;
+
   # enable calibre content server
   networking.firewall.allowedTCPPorts  = [ 9090 ];
-
   environment.variables."SSL_CERT_FILE" = "/etc/ssl/certs/ca-bundle.crt";
 
   # Binary Cache for Haskell.nix
@@ -273,4 +295,24 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="066
   nix.settings.substituters = [
     "https://cache.iog.io"
   ];
+
+  # mlocate support
+  services.locate = {
+    enable = true;
+    package = pkgs.mlocate;
+    localuser = null;
+    interval = "hourly";
+  };
+
+  # work stuff
+  services.tailscale.enable = true;
+  services.postgresql = {
+    enable = true;
+    ensureDatabases = [ "mydatabase" ];
+    authentication = pkgs.lib.mkOverride 10 ''
+      #type database  DBuser  auth-method
+      local all       all     trust
+    '';
+  };
+
 }
