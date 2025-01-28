@@ -85,7 +85,7 @@
   users.users.sandy = {
     isNormalUser = true;
     description = "Sandy";
-    extraGroups = [ "networkmanager" "wheel" "video" "dialout" "mlocate" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "dialout" "mlocate" "usb" ];
     shell = pkgs.zsh;
     packages = with pkgs; [
     #  thunderbird
@@ -125,6 +125,7 @@
     direnv
     unstable.fzf
     mermaid-cli
+    gh
 
     # desktop
     xmonad-with-packages
@@ -138,6 +139,7 @@
     scrot
     urlencode # for hackage search
     lsof
+    restream
 
     # apps
     spotify
@@ -149,7 +151,7 @@
     calibre
     unstable.yed
     inkscape
-    rmapi
+    unstable.rmapi
     transcribe
     vlc
     libreoffice-qt6-still
@@ -204,8 +206,10 @@
 
 
     # fpga
-    openfpgaloader
-    python312Packages.apycula # opensource gowin packing
+    unstable.openfpgaloader
+    unstable.python312Packages.apycula # opensource gowin packing
+    unstable.nextpnr
+    yosys
 
     # temporary
 
@@ -314,5 +318,15 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="066
       local all       all     trust
     '';
   };
-
+services.openssh = {
+  enable = true;
+  ports = [ 22 ];
+  settings = {
+    PasswordAuthentication = true;
+    AllowUsers = null; # Allows all users by default. Can be [ "user1" "user2" ]
+    UseDns = true;
+    X11Forwarding = false;
+    PermitRootLogin = "prohibit-password"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
+  };
+};
 }
