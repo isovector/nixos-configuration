@@ -97,20 +97,23 @@
   programs.zsh.enable = true;
   programs.steam.enable = true;
 
-  programs.neovim = {
-    enable = true;
-    vimAlias = true;
-  };
+  # programs.neovim = {
+  #   enable = true;
+  #   vimAlias = true;
+  # };
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
+
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
     # development environment
     zsh
-    neovide
+    unstable.neovide
+    unstable.neovim
     git
     unstable.jujutsu
     thefuck
@@ -121,11 +124,11 @@
     gnumake
     tmux
     jq
-    haskellPackages.pointfree
+    # haskellPackages.pointfree
     direnv
     unstable.fzf
     mermaid-cli
-    gh
+    # gh
 
     # desktop
     xmonad-with-packages
@@ -135,33 +138,34 @@
     rofi
     feh
     eww
-    playerctl
     scrot
     urlencode # for hackage search
     lsof
     restream
+    xscreensaver
+    pidgin-with-plugins
+
+    # calendar
+    khal
+    vdirsyncer
 
     # apps
-    spotify
     pavucontrol
-    beeper
+    unstable.beeper
     thunderbird
     gimp-with-plugins
     evince
     calibre
-    unstable.yed
-    inkscape
     unstable.rmapi
-    transcribe
+    # transcribe
     vlc
-    libreoffice-qt6-still
     deluge-gtk
-    wineWowPackages.stable
-    sqlite-interactive
     asciinema
-    desmume
+    neomutt
 
     # utils
+    bitwarden-cli
+    mutt-wizard
     wget
     coreutils # chown; chmod
     thermald # powermgmt
@@ -180,43 +184,43 @@
     intel-gpu-tools
     libva-utils
     htop
-    vdpauinfo
-    yt-dlp
+    # vdpauinfo
     unrar
     graphviz
-    (agda.withPackages (ps: [
-      ps.standard-library
-    ]))
+    # (agda.withPackages (ps: [
+    #   ps.standard-library
+    # ]))
     proxmark3
     zip
     oath-toolkit #gashell
     openssl #gashell
     zbar #gashell
     curl #gashell
-    # texliveFull
     flamegraph
     inotify-tools
-    p7zip
     bat
-    fd
     tree
     btop
-    lsd
-    fsatrace
+    difftastic
+
+    burpsuite
+
+    # housing
+    sqlite
+    sqlite-utils
+    datasette
 
 
     # fpga
-    unstable.openfpgaloader
-    unstable.python312Packages.apycula # opensource gowin packing
-    unstable.nextpnr
-    yosys
+    # unstable.openfpgaloader
+    # unstable.python312Packages.apycula # opensource gowin packing
+    # unstable.nextpnr
+    # yosys
+  ];
 
-    # temporary
-
-    vaapiVdpau
-    vulkan-loader
-    vulkan-tools
-    vulkan-validation-layers
+  fonts.packages = with pkgs; [
+    nerdfonts
+    font-awesome
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -276,6 +280,11 @@ KERNEL=="hidraw*", ATTRS{idVendor}=="3297", MODE="0664", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTR{idVendor}=="3297", GROUP="plugdev"
 SUBSYSTEM=="usb", ATTR{idVendor}=="3297", ATTR{idProduct}=="1969", GROUP="plugdev"
 SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="0666", SYMLINK+="stm32_dfu"
+
+# flipper
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", ATTRS{manufacturer}=="Flipper Devices Inc.", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", ATTRS{manufacturer}=="STMicroelectronics", TAG+="uaccess"
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="40??", ATTRS{manufacturer}=="Flipper Devices Inc.", TAG+="uaccess"
   '';
 
 
@@ -318,15 +327,22 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="df11", MODE:="066
       local all       all     trust
     '';
   };
-services.openssh = {
+
+services.xscreensaver = {
   enable = true;
-  ports = [ 22 ];
-  settings = {
-    PasswordAuthentication = true;
-    AllowUsers = null; # Allows all users by default. Can be [ "user1" "user2" ]
-    UseDns = true;
-    X11Forwarding = false;
-    PermitRootLogin = "prohibit-password"; # "yes", "without-password", "prohibit-password", "forced-commands-only", "no"
-  };
 };
+
+boot.loader.systemd-boot.configurationLimit = 5;
+# nix.gc.automatic = true;
+
+ nixpkgs.config = {
+    packageOverrides = pkgs: with pkgs; {
+      pidgin-with-plugins = pkgs.pidgin.override {
+        ## Add whatever plugins are desired (see nixos.org package listing).
+        plugins = [ pidgin-otr pidgin-latex purple-slack ];
+      };
+    };
+  };
+
 }
+
