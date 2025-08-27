@@ -8,17 +8,17 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
-      ./hosts.nix
+      # ./hosts.nix
     ];
 
-  nixpkgs.overlays = [
-    (final: prev: {
-      unstable = import <nixos-unstable> {
-        config = { allowUnfree = true; };
-        system = prev.system;
-      };
-    })
-  ];
+#   nixpkgs.overlays = [
+#     (final: prev: {
+#       unstable = import <nixos-unstable> {
+#         config = { allowUnfree = true; };
+#         system = prev.system;
+#       };
+#     })
+#   ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -29,6 +29,7 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+  networking.firewall.allowedTCPPorts = [22 8080 9090 8112];
 
 
   # Set your time zone.
@@ -48,6 +49,11 @@
     enableContribAndExtras = true;
   };
 
+  services.deluge = {
+    enable = true;
+    web.enable = true;
+  };
+
   services.libinput.enable = true;
   services.libinput.touchpad = {
     clickMethod = "clickfinger";
@@ -63,10 +69,44 @@
   };
 
   # Enable CUPS to print documents.
-  services.printing.enable = true;
+  services.printing = {
+    enable = true;
+    drivers = [ pkgs.brlaser ];
+  };
+  services.avahi = {
+    enable = true;
+    nssmdns4 = true;  # Enables .local resolution
+    publish = {
+      enable = true;
+      addresses = true;
+      workstation = true;
+      domain = true;
+    };
+  };
+
+  # rss
+  services = {
+    freshrss = {
+      enable = true;
+      defaultUser = "sandy";
+      authType = "none";
+      baseUrl = "http://localhost:8080";
+      virtualHost = "localhost";  # disables default nginx vhost setup
+    };
+
+    nginx = {
+      enable = true;
+      virtualHosts."localhost" = {
+        listen = [{
+          addr = "0.0.0.0";
+          port = 8080;
+        }];
+      };
+    };
+  };
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
+  services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -93,7 +133,7 @@
   };
 
   # Install firefox.
-  programs.firefox.enable = true;
+  # programs.firefox.enable = true;
   programs.zsh.enable = true;
   programs.steam.enable = true;
 
@@ -112,10 +152,10 @@
   environment.systemPackages = with pkgs; [
     # development environment
     zsh
-    unstable.neovide
-    unstable.neovim
+    neovide
+    neovim
     git
-    unstable.jujutsu
+    jujutsu
     thefuck
     silver-searcher
     jump
@@ -124,11 +164,12 @@
     gnumake
     tmux
     jq
-    # haskellPackages.pointfree
     direnv
-    unstable.fzf
+    fzf
     mermaid-cli
     # gh
+    futhark
+    chromium
 
     # desktop
     xmonad-with-packages
@@ -141,9 +182,8 @@
     scrot
     urlencode # for hackage search
     lsof
-    restream
+    # restream
     xscreensaver
-    pidgin-with-plugins
 
     # calendar
     khal
@@ -151,21 +191,21 @@
 
     # apps
     pavucontrol
-    unstable.beeper
+    beeper
     thunderbird
     gimp-with-plugins
     evince
     calibre
-    unstable.rmapi
-    # transcribe
+    transcribe
     vlc
-    deluge-gtk
     asciinema
-    neomutt
+    neomutt # mail
+    khard # contacts
+    reaper
+    # rustdesk
 
     # utils
     bitwarden-cli
-    mutt-wizard
     wget
     coreutils # chown; chmod
     thermald # powermgmt
@@ -184,34 +224,33 @@
     intel-gpu-tools
     libva-utils
     htop
-    # vdpauinfo
     unrar
     graphviz
-    # (agda.withPackages (ps: [
-    #   ps.standard-library
-    # ]))
-    proxmark3
+    (agda.withPackages (ps: [
+      ps.standard-library
+    ]))
+    # proxmark3
     zip
     oath-toolkit #gashell
     openssl #gashell
     zbar #gashell
     curl #gashell
-    flamegraph
+    # flamegraph
     inotify-tools
     bat
     tree
     btop
-    difftastic
 
-    burpsuite
+    # music
+    timidity
+    lilypond
 
-    # housing
-    sqlite
-    sqlite-utils
-    datasette
+    # soh
+    shipwright
 
+    freecad
 
-    # fpga
+    # # fpga
     # unstable.openfpgaloader
     # unstable.python312Packages.apycula # opensource gowin packing
     # unstable.nextpnr
@@ -219,9 +258,8 @@
   ];
 
   fonts.packages = with pkgs; [
-    nerdfonts
     font-awesome
-  ];
+  ] ++ builtins.filter lib.attrsets.isDerivation (builtins.attrValues pkgs.nerd-fonts);
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
@@ -234,7 +272,7 @@
   # List services that you want to enable:
 
   # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
+  services.openssh.enable = true;
 
   # Open ports in the firewall.
   # networking.firewall.allowedTCPPorts = [ ... ];
@@ -248,15 +286,12 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.05"; # Did you read the comment?
-
-  services.miniflux.enable = true;
-  services.miniflux.adminCredentialsFile = "/home/sandy/.tino/miniflux.conf";
+  system.stateVersion = "25.05"; # Did you read the comment?
 
   # bluetooth
   hardware.bluetooth.enable = true;
   hardware.bluetooth.powerOnBoot = true;
-  hardware.opengl.enable = true;
+  hardware.graphics.enable = true;
 
   powerManagement.enable = true;
   # powerManagement.powertop.enable = true;
@@ -298,7 +333,6 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="40??", ATTRS{manu
   programs.noisetorch.enable = true;
 
   # enable calibre content server
-  networking.firewall.allowedTCPPorts  = [ 9090 ];
   environment.variables."SSL_CERT_FILE" = "/etc/ssl/certs/ca-bundle.crt";
 
   # Binary Cache for Haskell.nix
@@ -313,7 +347,6 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="40??", ATTRS{manu
   services.locate = {
     enable = true;
     package = pkgs.mlocate;
-    localuser = null;
     interval = "hourly";
   };
 
@@ -332,17 +365,23 @@ services.xscreensaver = {
   enable = true;
 };
 
-boot.loader.systemd-boot.configurationLimit = 5;
-# nix.gc.automatic = true;
+# for bazr
+xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+xdg.portal.enable = true;
+services.flatpak.enable = true;
 
- nixpkgs.config = {
-    packageOverrides = pkgs: with pkgs; {
-      pidgin-with-plugins = pkgs.pidgin.override {
-        ## Add whatever plugins are desired (see nixos.org package listing).
-        plugins = [ pidgin-otr pidgin-latex purple-slack ];
-      };
-    };
-  };
+
+# mimes
+environment.etc."xdg/mimeapps.list".text = ''
+    [Default Applications]
+    text/plain=neovide.desktop
+    text/markdown=neovide.desktop
+    application/json=neovide.desktop
+    application/x-yaml=neovide.desktop
+    application/x-shellscript=neovide.desktop
+  '';
+
+boot.loader.systemd-boot.configurationLimit = 5;
 
 }
 

@@ -53,11 +53,9 @@
 
   # hardware accel
   hardware = {
-    opengl.enable = true;
-    opengl.driSupport = true;
-    opengl.driSupport32Bit = true;
+    graphics.enable = true;
 
-    opengl.extraPackages = with pkgs; [
+    graphics.extraPackages = with pkgs; [
         intel-media-driver
         vaapiVdpau
         libvdpau-va-gl
