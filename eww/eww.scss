@@ -1,0 +1,250 @@
+@import "gruvbox.scss";
+
+* {
+  all: unset; //Unsets everything so you can style everything from scratch
+}
+
+//Global Styles
+.bar {
+  background-color: $background;
+  color: $foreground;
+  padding: 5px;
+  font-size: 1em;
+  font-family: Hack Regular;
+}
+
+.bottombar {
+  background-color: $background;
+  color: $foreground;
+  padding: 5px;
+  font-size: 1em;
+  font-family: Hack Regular;
+}
+
+// Styles on classes (see eww.yuck for more information)
+
+.icon-module {
+  // margin: 0 5px;
+  & > &__icon {
+    margin-right: 5px;
+    font-family: "Font Awesome 6 Free";
+  }
+}
+
+.icon {
+  font-family: "Font Awesome 6 Free";
+}
+
+.world {
+  font-weight: bold;
+}
+
+.clock {
+  font-weight: bold;
+  margin-top: 3px;
+  margin-bottom: -3px;
+}
+
+.sidestuff slider {
+  all: unset;
+  color: #ffd5cd;
+}
+
+.metric scale trough highlight {
+  all: unset;
+  background-color: $green;
+  color: $black;
+  border-radius: 10px;
+}
+
+.metric scale.warning trough highlight {
+  all: unset;
+  background-color: $yellow;
+  color: $black;
+  border-radius: 10px;
+}
+
+.metric scale.error trough highlight {
+  all: unset;
+  background-color: $error;
+  color: $black;
+  border-radius: 10px;
+}
+
+.metric scale.volume trough highlight {
+  all: unset;
+  background-color: $lightmagenta;
+  color: $black;
+  border-radius: 10px;
+}
+
+.metric scale trough {
+  all: unset;
+  background-color: $background-alt;
+  border-radius: 50px;
+  min-height: 5px;
+  min-width: 100px;
+  margin-left: 10px;
+  margin-right: 20px;
+}
+
+.label-ram {
+  font-size: large;
+}
+
+.workspaces {
+  background-color: $background-alt;
+  border-radius: 15px;
+  margin-left: 5px;
+  margin-top: 5px;
+  padding-left: 10px;
+  padding-right: 5px;
+
+  font-family: "Hack NF Regular";
+  font-size: 10px;
+  margin-right: 20px;
+
+  button {
+    color: #a89984;
+    margin: 0px 3px;
+  }
+  button.focused {
+    color: $green;
+  }
+  button.urgent {
+    color: $urgent;
+  }
+}
+
+.spotify {
+  font-size: 1em;
+  // border-radius: 20px;
+  // background-color: $green;
+  // color: $background;
+  color: $green;
+}
+
+.spotify-text {
+  font-size: 1em;
+  background-color: $green;
+  color: $green;
+}
+
+.notifications {
+  font-size: 1em;
+  // border-radius: 20px;
+  // background-color: red;
+  // color: $background;
+  color: $green;
+}
+
+.notifications-text {
+  font-size: 1em;
+  background-color: red;
+  color: $green;
+}
+
+.docker {
+  font-family: "Font Awesome 5 Brands";
+  // border-radius: 20px;
+  font-size: 1em;
+  background-color: $blue;
+  color: $background;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.github {
+  font-family: "Font Awesome 5 Brands";
+  font-size: 1em;
+  // background-color: $gray;
+  // color: $background;
+  color: $green;
+}
+
+.github-text {
+  font-family: "Font Awesome 5 Brands";
+  font-size: 1em;
+  background-color: $lightgray;
+  color: $black;
+  padding-top: 0.7em;
+}
+
+.volume {
+  font-family: "Font Awesome 5 Brands";
+  font-size: 1em;
+  // border: 1px solid $gray;
+  color: $foreground;
+}
+
+.uplink {
+  color: $lightmagenta;
+}
+
+.veryuplink {
+  color: $red;
+}
+
+.noactive {
+  color: $white;
+}
+
+.ws-sq {
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.active {
+  // has windows
+}
+
+.visible {
+  background-color: $green;
+  color: #000;
+}
+
+.invisible {
+}
+
+.current {
+  background-color: $red;
+  color: #000;
+}
+
+.downlink {
+  color: $lightcyan;
+}
+
+.verydownlink {
+  color: $green;
+}
+
+.full-battery {
+  color: $lightcyan;
+}
+
+.half-battery {
+  color: $green;
+}
+
+.low-battery {
+  color: $red;
+}
+
+.empty-battery {
+  color: $red;
+}
+
+.close {
+  background-color: $red;
+  color: $background;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+button:hover {
+  text-decoration: underline;
+  color: white;
+}

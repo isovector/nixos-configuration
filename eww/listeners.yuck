@@ -1,0 +1,15 @@
+(deflisten music
+  :initial ""
+  :onchange "eww update revealMusic=true && sleep 3 && eww update revealMusic=false"
+  "playerctl -p spotify --follow metadata --format '{{ artist }} - {{ title }}' || true")
+
+(deflisten musicStatus "playerctl -p spotify --follow status || true"
+  )
+
+(deflisten xmonad "xprop -spy -notype -root 8t _XMONAD_LOG | stdbuf -o0 cut -d'=' -f 2- | stdbuf -o0 sed -u 's/}\"\$/}/' | stdbuf -o0 sed -u 's/ \"{/{/'")
+
+(deflisten cava "scripts/cava-internal")
+
+(deflisten notifications
+  :initial ""
+  "notification-listener")

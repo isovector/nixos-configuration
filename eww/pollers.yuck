@@ -1,0 +1,14 @@
+(defpoll weather :interval "60s" "weather Vancouver,CA")
+
+(defpoll volume :interval "1s"  "scripts/getvol")
+
+(defpoll time :interval "10s"  "date '+%H:%M'")
+
+(defpoll clocktime :interval "10s"  "date '+%I'")
+
+(defpoll date :interval "60s"  "date '+%Y-%m-%d'")
+
+(defpoll wirelessId :interval "60s"  "iwgetid -r")
+
+(defpoll interfaceId :interval "60s" "route | grep default | head -n1 | awk '{print $8}'")
+

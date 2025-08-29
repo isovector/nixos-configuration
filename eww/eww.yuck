@@ -1,0 +1,218 @@
+; Add the includes
+
+(include "variables.yuck")
+(include "controls.yuck")
+(include "listeners.yuck")
+(include "metrics.yuck")
+(include "pollers.yuck")
+(include "revealer.yuck")
+
+(defwidget info []
+  (box :space-evenly false :spacing 4
+   (children :nth 0)
+   (revealer
+     :reveal "${revealInfo}"
+     :transition "slideright"
+     (children :nth 1)
+   )
+  )
+)
+
+(defwidget musicinfo []
+  (box :space-evenly false :spacing 4
+   (children :nth 0)
+   (revealer
+     :reveal "${revealInfo || revealMusic}"
+     :transition "slideright"
+     (children :nth 1)
+   )
+  )
+)
+
+(defwidget antiinfo []
+  (box :space-evenly false :spacing 4
+   (children :nth 0)
+   (revealer
+     :reveal "${!revealInfo}"
+     :transition "slideright"
+     (children :nth 1)
+   )
+  )
+)
+
+(defwidget bar []
+  (centerbox :orientation "h" :space-evenly true
+    (workspaces)
+    (revealer :reveal "${!revealInfo}" (label :text "${xmonad.title} - ${xmonad.layout}" :limit-width "80"))
+    ; (box :halign "h" :space-evenly true  (weather)  )
+    (sidestuff)
+  )
+)
+
+(defwidget ws [id ?class]
+    (eventbox
+      :visible `${xmonad[id] != "null" ? true : false}`
+        ; :onclick `wmctrl -s ${id - 1}`
+        (label :text "${workspaceMap[id]}"
+            :class `ws-sq ${class ?: ""} ${xmonad[id]} ${xmonad[id] != "null" ? "" : "invisible"}`
+        )
+    )
+)
+
+(defwidget bottombar []
+  (centerbox :orientation "h"
+    (box :halign "start" :orientation "h" :space-evenly false (workspaces))
+    (box :halign "end" :orientation "h" :space-evenly false)
+    (box :orientation "h" :halign "end" :space-evenly false
+      (metric :icon ""
+        :onclick "htop --sort-key PERCENT_MEM"
+      :value {EWW_RAM.used_mem_perc})
+      (metric :icon ""
+        :onclick "htop --sort-key PERCENT_CPU"
+      :value {EWW_CPU.avg})
+      (metric :icon ""
+        :onclick "mc"
+        :value "${round(EWW_DISK["/"].used_perc, 0)}")
+      (network)
+    )
+  )
+)
+
+(defwidget workspaces []
+  (box
+        :halign "start"
+        (ws :id "1" :class "world")
+        (ws :id "2")
+        (ws :id "3")
+        (ws :id "4")
+        (ws :id "5")
+        (ws :id "6")
+        (ws :id "7")
+        (ws :id "8")
+        (ws :id "9")
+    )
+)
+
+(defwidget icon-module [icon ?class ?visible]
+  (box :class "${class} icon-module"
+    :orientation "h"
+    :halign "start"
+    :space-evenly false
+    :visible {visible ?: true} ; because the argument is optional
+    (label :class "icon-module__icon" :text "${icon}")
+    (children)
+  )
+)
+
+(defwidget sidestuff []
+  (box :class "sidestuff ${notifications}" :orientation "h" :space-evenly false :halign "end" :spacing 6
+      ; (spotify)
+      ; (weather)
+      (date)
+      (time)
+      (battery)
+      (systray :pack-direction "ltr")
+  )
+)
+
+(defwidget weather []
+  (info
+    (icon-module :icon "${weather.icon}")
+    (label :text "${weather.description}")
+  )
+)
+
+
+(defwidget spotify []
+  (musicinfo
+    (label :text " ${ musicStatus == "Playing" ? "" : "" }")
+    (label :text "  ${music} " :limit-width "50")
+    ))
+
+(defwidget battery []
+  (antiinfo
+    (icon-module :icon "${ EWW_BATTERY.BAT0.status == "Charging" ||  EWW_BATTERY.BAT0.status == "Full"  ? "🔌" : EWW_BATTERY.BAT0.capacity >= 20 ? "🔋" : "🪫"}"
+           :class "battery ${ EWW_BATTERY.BAT0.capacity >= 50
+                     ? "full-battery"
+                     : EWW_BATTERY.BAT0.capacity >= 15
+                        ? "half-battery"
+                        : EWW_BATTERY.BAT0.capacity >= 5
+                        ? "low-battery"
+                        : "empty-battery"  }")
+    (label :class "battery" :text "${EWW_BATTERY.BAT0.capacity}")
+    ))
+
+(defwidget date []
+  (antiinfo
+    (icon-module :icon "📆")
+    (label :text " ${date} ")))
+
+(defwidget time []
+  (antiinfo
+    (label :class "clock" :text " ${clockmap[clocktime]} ")
+    (label :text " ${time} ")))
+
+  (defwidget network []
+    (box :orientation "h" :space-evenly false (label :text "${interfaceId}: ${round(EWW_NET[interfaceId].NET_UP / 1000000, 2)}")
+      (label :class {round(EWW_NET[interfaceId].NET_UP / 1000000, 2) > 0.1 ?
+        round(EWW_NET[interfaceId].NET_UP / 1000000, 2) > 5 ?
+        "veryuplink" : "uplink" : "noactive"} :text "  "
+      )
+      (label :text "${round(EWW_NET[interfaceId].NET_DOWN / 1000000, 2)}")
+      (label :class {round(EWW_NET[interfaceId].NET_DOWN / 1000000, 2) > 0.1 ?
+        round(EWW_NET[interfaceId].NET_DOWN / 1000000, 2) > 10 ?
+        "verydownlink" : "downlink" : "noactive"} :text "  "
+      )
+    )
+  )
+  ;
+
+  (defwindow bar0
+    :monitor 0
+    :windowtype "dock"
+    :geometry (geometry :x "0%"
+      :y "0%"
+      :width "100%"
+      :height "10px"
+    :anchor "top center")
+    :reserve (struts :side "top" :distance "24px")
+    (bar)
+  )
+
+  (defwindow bar1
+    :monitor 1
+    :windowtype "dock"
+    :geometry (geometry :x "0%"
+      :y "0%"
+      :width "100%"
+      :height "10px"
+    :anchor "top center")
+    :reserve (struts :side "top" :distance "24px")
+    (bar)
+  )
+
+  (defwindow bar2
+    :monitor 2
+    :windowtype "dock"
+    :geometry (geometry :x "0%"
+      :y "0%"
+      :width "100%"
+      :height "10px"
+    :anchor "top center")
+    :reserve (struts :side "top" :distance "24px")
+    (bar)
+  )
+
+  (defwindow bottombar
+    :monitor 0
+    :windowtype "dock"
+    :geometry (geometry :x "0%"
+      :y "0%"
+      :width "90%"
+      :height "10px"
+    :anchor "bottom center")
+    :reserve (struts :side "bottom" :distance "4%")
+    (bottombar)
+  )
+
+

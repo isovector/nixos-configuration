@@ -1,0 +1,38 @@
+(defvar revealVolume false)
+(defvar revealDate false)
+(defvar revealSpotify false)
+(defvar revealGithub false)
+(defvar revealNotify false)
+
+(defvar revealInfo false)
+(defvar revealMusic false)
+
+(defvar workspaceMap "{ \"1\": \"🌎\"
+                      , \"2\": \"🔨\"
+                      , \"3\": \"🗎\"
+                      , \"4\": \"🎲\"
+                      , \"5\": \"▶️\"
+                      , \"6\": \"💬\"
+                      , \"7\": \"⛰️\"
+                      , \"8\": \"🧦\"
+                      , \"9\": \"📡\"
+                      }")
+
+
+(defvar clockmap "{ \"1\":  \"🕐\"
+                  , \"2\":  \"🕑\"
+                  , \"3\":  \"🕒\"
+                  , \"4\":  \"🕓\"
+                  , \"5\":  \"🕔\"
+                  , \"6\":  \"🕕\"
+                  , \"7\":  \"🕖\"
+                  , \"8\":  \"🕗\"
+                  , \"9\":  \"🕘\"
+                  , \"10\": \"🕙\"
+                  , \"11\": \"🕚\"
+                  , \"12\": \"🕛\"
+                  , \"0\":  \"🕛\"
+                  }")
+
+; necktie: 👔
+; music: 🎼

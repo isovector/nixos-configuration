@@ -381,6 +381,15 @@ environment.etc."xdg/mimeapps.list".text = ''
     application/x-shellscript=neovide.desktop
   '';
 
+# eww
+  system.activationScripts.ewwConfigs = {
+    text = ''
+      rm -rf ${config.users.users.sandy.home}/.config/eww
+      ln -sf /etc/nixos/eww ${config.users.users.sandy.home}/.config/eww
+      chown sandy:users ${config.users.users.sandy.home}/.config/eww
+    '';
+  };
+
 boot.loader.systemd-boot.configurationLimit = 5;
 
 }
