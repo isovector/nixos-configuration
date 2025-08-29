@@ -47,6 +47,7 @@
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
+    config = ./xmonad.hs;
   };
 
   services.deluge = {
@@ -172,7 +173,6 @@
     chromium
 
     # desktop
-    xmonad-with-packages
     brave
     acpilight # xbacklight
     redshift
