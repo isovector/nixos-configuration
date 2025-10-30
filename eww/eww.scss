@@ -2,6 +2,8 @@
 
 * {
   all: unset; //Unsets everything so you can style everything from scratch
+  background-color: #eee5e9;
+  color: #7c7c7c;
 }
 
 //Global Styles
@@ -43,6 +45,9 @@
   font-weight: bold;
   margin-top: 3px;
   margin-bottom: -3px;
+}
+
+.vertical {
 }
 
 .sidestuff slider {
@@ -190,27 +195,26 @@
 }
 
 .ws-sq {
-  padding-left: 6px;
-  padding-right: 6px;
+  padding-left: 2px;
+  padding-right: 2px;
   padding-top: 0px;
   padding-bottom: 0px;
 }
 
 .active {
   // has windows
+  // color: #fed766;
 }
 
 .visible {
-  background-color: $green;
-  color: #000;
+  color: #92dce5;
 }
 
 .invisible {
 }
 
 .current {
-  background-color: $red;
-  color: #000;
+  color: #d64933;
 }
 
 .downlink {

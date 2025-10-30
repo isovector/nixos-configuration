@@ -186,6 +186,7 @@ keysToBind =
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
+  , ((modk, xK_s),                  spawn "/home/sandy/.tino/bin/rofi-work-hackage")
   , ((modk, xK_r),                  safeSpawn' "eww" "reload")
   , ((modk, xK_backslash),          polybar)
   -- , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
@@ -301,11 +302,11 @@ shortcuts =
   , (xK_w, "https://workflowy.com")
   -- , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
   -- , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1922138192530766354/edit")
-  , (xK_j, "https://docs.google.com/spreadsheets/d/1udeiGM0kxpk-LhfcrtbrDe3Hf60N11ol_h8lzRepvi8/edit?gid=563104560#gid=563104560")
-  , (xK_p, "https://www.wellnessliving.com/rs/schedule/origins_parkour")
+  -- , (xK_j, "https://docs.google.com/spreadsheets/d/1udeiGM0kxpk-LhfcrtbrDe3Hf60N11ol_h8lzRepvi8/edit?gid=563104560#gid=563104560")
+  -- , (xK_p, "https://www.wellnessliving.com/rs/schedule/origins_parkour")
   , (xK_t, "https://www.rememberthemilk.com/app/#list/48436173")
   , (xK_a, "http://192.168.1.2:8123/")
-  , (xK_y, "http://100.92.132.112:8451")
+  -- , (xK_y, "http://100.92.132.112:8451")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]

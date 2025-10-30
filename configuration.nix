@@ -29,7 +29,8 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [22 8080 9090 8112];
+  networking.firewall.allowedTCPPorts = [22 8080 9090 8112 27036 27037 ];
+  networking.firewall.allowedUDPPorts = [ 27031 27032 27033 27034 27035 27036 ];
 
 
   # Set your time zone.
@@ -47,13 +48,14 @@
   services.xserver.windowManager.xmonad = {
     enable = true;
     enableContribAndExtras = true;
-    config = ./xmonad.hs;
+    enableConfiguredRecompile = true;
+    config = /etc/nixos/xmonad.hs;
   };
 
-  services.deluge = {
-    enable = true;
-    web.enable = true;
-  };
+#   services.deluge = {
+#     enable = true;
+#     web.enable = true;
+#   };
 
   services.libinput.enable = true;
   services.libinput.touchpad = {
@@ -171,6 +173,9 @@
     # gh
     futhark
     chromium
+    sshfs
+    mosh
+    deluge-gtk
 
     # desktop
     brave
@@ -184,10 +189,16 @@
     lsof
     # restream
     xscreensaver
+    nicotine-plus
+    beets
 
     # calendar
     khal
     vdirsyncer
+
+    # games
+    beyond-all-reason
+    superTuxKart
 
     # apps
     pavucontrol
@@ -203,6 +214,7 @@
     khard # contacts
     reaper
     # rustdesk
+    musescore
 
     # utils
     bitwarden-cli
@@ -342,6 +354,8 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="40??", ATTRS{manu
   nix.settings.substituters = [
     "https://cache.iog.io"
   ];
+  nix.settings.builders-use-substitutes = true;
+  nix.settings.trusted-users = [ "root" "sandy" ];
 
   # mlocate support
   services.locate = {
@@ -350,16 +364,17 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="40??", ATTRS{manu
     interval = "hourly";
   };
 
-  # work stuff
-  services.tailscale.enable = true;
-  services.postgresql = {
-    enable = true;
-    ensureDatabases = [ "mydatabase" ];
-    authentication = pkgs.lib.mkOverride 10 ''
-      #type database  DBuser  auth-method
-      local all       all     trust
-    '';
-  };
+#   # work stuff
+# networking.interfaces.enp36s0.ipAddress = "192.168.10.1";
+# networking.interfaces.enp36s0.prefixLength = 24;
+#   fileSystems."/home/sandy/prj/work" = {
+#     device = "192.168.10.2:/home/sandy/prj/tweag";
+#     fsType = "nfs";
+#     options = [ "rw" "noatime" "vers=3" "tcp" "rsize=131072" "wsize=131072" "timeo=30" ];
+#   };
+
+#   # optional, ensures NFS support is enabled for on-demand mounting
+#   boot.supportedFilesystems = [ "nfs" ];
 
 services.xscreensaver = {
   enable = true;

@@ -43,7 +43,7 @@
 (defwidget bar []
   (centerbox :orientation "h" :space-evenly true
     (workspaces)
-    (revealer :reveal "${!revealInfo}" (label :text "${xmonad.title} - ${xmonad.layout}" :limit-width "80"))
+    (revealer :reveal "${!revealInfo}" (label :text "${xmonad.title}" :limit-width "80"))
     ; (box :halign "h" :space-evenly true  (weather)  )
     (sidestuff)
   )
@@ -51,9 +51,10 @@
 
 (defwidget ws [id ?class]
     (eventbox
-      :visible `${xmonad[id] != "null" ? true : false}`
+      ; :visible `${xmonad[id] != "null" ? true : false}`
         ; :onclick `wmctrl -s ${id - 1}`
-        (label :text "${workspaceMap[id]}"
+        (label :text `${xmonad[id] != "null" ? "●" : "○"}`
+            ; "${workspaceMap[id]}"
             :class `ws-sq ${class ?: ""} ${xmonad[id]} ${xmonad[id] != "null" ? "" : "invisible"}`
         )
     )
@@ -105,13 +106,12 @@
 )
 
 (defwidget sidestuff []
-  (box :class "sidestuff ${notifications}" :orientation "h" :space-evenly false :halign "end" :spacing 6
+  (box :class "sidestuff ${notifications}" :orientation "h" :space-evenly false :halign "end" :spacing 1
       ; (spotify)
       ; (weather)
-      (date)
-      (time)
+      (datetime)
       (battery)
-      (systray :pack-direction "ltr")
+      ; (systray :pack-direction "ltr")
   )
 )
 
@@ -131,25 +131,25 @@
 
 (defwidget battery []
   (antiinfo
-    (icon-module :icon "${ EWW_BATTERY.BAT0.status == "Charging" ||  EWW_BATTERY.BAT0.status == "Full"  ? "🔌" : EWW_BATTERY.BAT0.capacity >= 20 ? "🔋" : "🪫"}"
-           :class "battery ${ EWW_BATTERY.BAT0.capacity >= 50
-                     ? "full-battery"
-                     : EWW_BATTERY.BAT0.capacity >= 15
-                        ? "half-battery"
-                        : EWW_BATTERY.BAT0.capacity >= 5
-                        ? "low-battery"
-                        : "empty-battery"  }")
-    (label :class "battery" :text "${EWW_BATTERY.BAT0.capacity}")
+    ; (icon-module :icon "${ EWW_BATTERY.BAT0.status == "Charging" ||  EWW_BATTERY.BAT0.status == "Full"  ? "🔌" : EWW_BATTERY.BAT0.capacity >= 20 ? "🔋" : "🪫"}"
+    ;        :class "battery ${ EWW_BATTERY.BAT0.capacity >= 50
+    ;                  ? "full-battery"
+    ;                  : EWW_BATTERY.BAT0.capacity >= 15
+    ;                     ? "half-battery"
+    ;                     : EWW_BATTERY.BAT0.capacity >= 5
+    ;                     ? "low-battery"
+    ;                     : "empty-battery"  }")
+    (label :class "battery" :text "// ${EWW_BATTERY.BAT0.capacity}")
     ))
 
-(defwidget date []
+(defwidget datetime []
   (antiinfo
-    (icon-module :icon "📆")
-    (label :text " ${date} ")))
+    ; (icon-module :icon "📆")
+    (label :text " ${date} ${time}")))
 
 (defwidget time []
   (antiinfo
-    (label :class "clock" :text " ${clockmap[clocktime]} ")
+    ; (label :class "clock" :text " ${clockmap[clocktime]} ")
     (label :text " ${time} ")))
 
   (defwidget network []
@@ -175,7 +175,8 @@
       :width "100%"
       :height "10px"
     :anchor "top center")
-    :reserve (struts :side "top" :distance "24px")
+    :reserve (struts :side "top" :distance "16px")
+    :class "bar"
     (bar)
   )
 
@@ -187,7 +188,7 @@
       :width "100%"
       :height "10px"
     :anchor "top center")
-    :reserve (struts :side "top" :distance "24px")
+    :reserve (struts :side "top" :distance "16px")
     (bar)
   )
 
