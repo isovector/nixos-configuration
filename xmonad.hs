@@ -135,7 +135,7 @@ myLayout = -- onLeft mydrawer $
   ||| noBorders (fullscreenFull Full)
 
 
-myterm = "kitty"
+myterm = "terminator"
 
 mydrawer = simpleDrawer 0.01 0.3 (ClassName myterm)
 

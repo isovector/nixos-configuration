@@ -2,7 +2,8 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
 
 {
   imports =
@@ -11,14 +12,59 @@
       # ./hosts.nix
     ];
 
-#   nixpkgs.overlays = [
-#     (final: prev: {
-#       unstable = import <nixos-unstable> {
-#         config = { allowUnfree = true; };
-#         system = prev.system;
-#       };
-#     })
-#   ];
+
+nixpkgs.overlays = [
+  (final: prev: {
+    signal-desktop = prev.signal-desktop.overrideAttrs (old: {
+      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ final.nodePackages.asar ];
+      postInstall = (old.postInstall or "") + ''
+        echo "Patching Signal Desktop expiry (electron-repair style)..."
+        ASAR=$(find "$out" -name "app.asar" | head -1)
+        WORKDIR="$TMPDIR/signal-patch"
+        mkdir -p "$WORKDIR"
+
+        asar extract "$ASAR" "$WORKDIR/app"
+
+        PRELOAD="$WORKDIR/app/preload.bundle.js"
+        if [ ! -f "$PRELOAD" ]; then
+          echo "ERROR: preload.bundle.js not found! Available JS files:"
+          find "$WORKDIR/app" -name "*.js" | head -20
+          exit 1
+        fi
+
+        # Patch hasBuildExpired (ts/util/buildExpiration.std.ts) to always return
+        # false, disabling the ~31 day build expiry timebomb.
+        # The bundle preserves function names; use node to handle the multi-line
+        # destructured parameter cleanly instead of fighting sed.
+        node - "$PRELOAD" <<'NODEEOF'
+const fs = require('fs');
+const file = process.argv[2];
+let content = fs.readFileSync(file, 'utf8');
+// [^)]* matches the destructured params {a,b,c} - no ) inside them,
+// so this correctly finds the ){  that opens the function body.
+const patched = content.replace(
+  /function hasBuildExpired\([^)]*\)\s*\{/,
+  match => match + '\n  return false; /* timebomb disabled */'
+);
+if (patched === content) {
+  process.stderr.write('ERROR: hasBuildExpired not found in preload.bundle.js!\n');
+  process.stderr.write('Grep for "hasBuildExpired":\n');
+  const hits = content.match(/.{0,60}hasBuildExpired.{0,60}/g) || [];
+  hits.slice(0, 10).forEach(h => process.stderr.write('  ' + h + '\n'));
+  process.exit(1);
+}
+fs.writeFileSync(file, patched);
+console.log('Patched hasBuildExpired successfully.');
+NODEEOF
+
+        # Pack to a temp location to avoid writing .unpacked into the read-only
+        # nix store; the existing .asar.unpacked (native .node files) is unchanged
+        asar pack "$WORKDIR/app" "$WORKDIR/patched.asar"
+        cp "$WORKDIR/patched.asar" "$ASAR"
+      '';
+    });
+  })
+];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -29,8 +75,9 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [22 8080 9090 8112 27036 27037 ];
+  networking.firewall.allowedTCPPorts = [22 8080 9090 8112 27036 27037 9000 9001 ];
   networking.firewall.allowedUDPPorts = [ 27031 27032 27033 27034 27035 27036 ];
+
 
 
   # Set your time zone.
@@ -55,6 +102,15 @@
 #   services.deluge = {
 #     enable = true;
 #     web.enable = true;
+#   };
+
+#   services.syncthing = {
+#     enable = true;
+#     openDefaultPorts = true;
+#     user = "sandy";
+#     dataDir = "/home/sandy/prj";
+#     configDir = "/home/sandy/.config/syncthing";
+#     settings.gui.user = "sandy";
 #   };
 
   services.libinput.enable = true;
@@ -99,12 +155,20 @@
 
     nginx = {
       enable = true;
+
       virtualHosts."localhost" = {
         listen = [{
           addr = "0.0.0.0";
           port = 8080;
         }];
       };
+  virtualHosts."_" = {
+    listen = [{ addr = "0.0.0.0"; port = 9001; }];
+    locations."/" = {
+      proxyPass = "http://127.0.0.1:9000";
+      proxyWebsockets = true;
+    };
+  };
     };
   };
 
@@ -138,7 +202,12 @@
   # Install firefox.
   # programs.firefox.enable = true;
   programs.zsh.enable = true;
-  programs.steam.enable = true;
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true;
+    dedicatedServer.openFirewall = true;
+    localNetworkGameTransfers.openFirewall = true;
+    };
 
   # programs.neovim = {
   #   enable = true;
@@ -159,23 +228,20 @@
     neovim
     git
     jujutsu
-    thefuck
     silver-searcher
     jump
-    kitty
     stack
     gnumake
     tmux
     jq
-    direnv
+    # direnv
     fzf
-    mermaid-cli
-    # gh
-    futhark
     chromium
     sshfs
     mosh
     deluge-gtk
+    vscode
+    terminator
 
     # desktop
     brave
@@ -188,7 +254,6 @@
     urlencode # for hackage search
     lsof
     # restream
-    xscreensaver
     nicotine-plus
     beets
 
@@ -198,11 +263,10 @@
 
     # games
     beyond-all-reason
-    superTuxKart
 
     # apps
     pavucontrol
-    beeper
+    signal-desktop
     thunderbird
     gimp-with-plugins
     evince
@@ -238,9 +302,9 @@
     htop
     unrar
     graphviz
-    (agda.withPackages (ps: [
-      ps.standard-library
-    ]))
+    # (agda.withPackages (ps: [
+    #   ps.standard-library
+    # ]))
     # proxmark3
     zip
     oath-toolkit #gashell
@@ -257,10 +321,13 @@
     timidity
     lilypond
 
-    # soh
-    shipwright
+    # work
+    gh
 
-    freecad
+    # soh
+    # shipwright
+
+    # freecad
 
     # # fpga
     # unstable.openfpgaloader
@@ -311,9 +378,9 @@
   services.tlp.enable = true;
 
   # don’t shutdown when power button is short-pressed
-  services.logind.extraConfig = ''
-    HandlePowerKey=ignore
-  '';
+  services.logind.settings.Login = {
+    HandlePowerKey = "ignore";
+  };
 
   services.udev.extraRules = ''
 # backlight
@@ -364,21 +431,21 @@ SUBSYSTEMS=="usb", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="40??", ATTRS{manu
     interval = "hourly";
   };
 
-#   # work stuff
-# networking.interfaces.enp36s0.ipAddress = "192.168.10.1";
-# networking.interfaces.enp36s0.prefixLength = 24;
-#   fileSystems."/home/sandy/prj/work" = {
-#     device = "192.168.10.2:/home/sandy/prj/tweag";
-#     fsType = "nfs";
-#     options = [ "rw" "noatime" "vers=3" "tcp" "rsize=131072" "wsize=131072" "timeo=30" ];
-#   };
-
-#   # optional, ensures NFS support is enabled for on-demand mounting
-#   boot.supportedFilesystems = [ "nfs" ];
-
-services.xscreensaver = {
-  enable = true;
-};
+  # work stuff
+  services.postgresql = {
+    enable = true;
+    ensureUsers = [
+      {
+        name = "sandy";
+        ensureDBOwnership = true;
+      }
+    ];
+    ensureDatabases = [ "sandy" ];
+    authentication = pkgs.lib.mkOverride 10 ''
+      #type database  DBuser  auth-method
+      local all       all     trust
+    '';
+  };
 
 # for bazr
 xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
